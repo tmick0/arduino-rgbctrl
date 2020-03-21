@@ -149,6 +149,7 @@ void rgbvm_increment_ip(struct rgbvm_state *vm, const unsigned int inst_len) {
   }
 }
 
+// https://stackoverflow.com/a/22120275/5777068
 void rgbvm_hsv2rgb_impl(unsigned char *h_r, unsigned char *s_g,
                         unsigned char *v_b) {
 
@@ -159,42 +160,44 @@ void rgbvm_hsv2rgb_impl(unsigned char *h_r, unsigned char *s_g,
     return;
   }
 
-  const unsigned char region = *h_r / 43;
-  const unsigned char remainder = (*h_r - (region * 43)) * 6;
+  // cast up to 16 bit to prevent overflow
+  const unsigned short h = *h_r, s = *s_g, v = *v_b;
 
-  // TODO: are these automatically upgraded to 16 bit ints on avr? does the
-  // arithmetic work?
-  const unsigned char p = (*v_b * (255 - *s_g)) >> 8;
-  const unsigned char q = (*v_b * (255 - ((*s_g * remainder) >> 8))) >> 8;
-  const unsigned char t =
-      (*v_b * (255 - ((*s_g * (255 - remainder)) >> 8))) >> 8;
+  const unsigned char region = h / 43;
+  const unsigned char remainder = (h - (region * 43)) * 6;
+
+  const unsigned char p = (v * (255 - s)) >> 8;
+  const unsigned char q = (v * (255 - ((s * remainder) >> 8))) >> 8;
+  const unsigned char t = (v * (255 - ((s * (255 - remainder)) >> 8))) >> 8;
 
   switch (region) {
   case 0:
-    *h_r = *v_b;
+    *h_r = v;
     *s_g = t;
     *v_b = p;
     break;
   case 1:
-    *s_g = *v_b;
     *h_r = q;
+    *s_g = v;
     *v_b = p;
     break;
   case 2:
-    *s_g = *v_b;
     *h_r = p;
+    *s_g = v;
     *v_b = t;
     break;
   case 3:
     *h_r = p;
     *s_g = q;
+    *v_b = v;
     break;
   case 4:
     *h_r = t;
     *s_g = p;
+    *v_b = v;
     break;
   default:
-    *h_r = *v_b;
+    *h_r = v;
     *s_g = p;
     *v_b = q;
     break;
