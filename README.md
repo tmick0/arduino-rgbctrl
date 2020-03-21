@@ -53,7 +53,7 @@ Execution starts at instruction offset 0, resetting to 0 if the end of the progr
 | mul      | rdst (rsrc\|imm) | multiply rdst by rsrc or immediate                               |
 | div      | rdst (rsrc\|imm) | divide rdst by rsrc or immediate                                 |
 | mod      | rdst (rsrc\|imm) | modulo rdst by rsrc or immediate                                 |
-| cmp      | rdst (rsrc\|imm) | compare rdst to imm and store the result in flags                |
+| cmp      | r0 (r1\|imm)     | compare r0 to r1 or imm and store the result in flags            |
 | write    | rr rg rb oimm    | write rgb value from registers to output identified by immediate |
 | hsv2rgb  | rh rs rv         | convert rgb values in registers to hsv (inplace)                 |
 | goto     | address          | move the instruction pointer to address                          |
