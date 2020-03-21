@@ -2,18 +2,26 @@ import bitstruct
 import argparse
 
 class opcode(int):
+    signedness = 'u'
     width = 4
 
 class register(int):
+    signedness = 'u'
     width = 4
 
 class immediate(int):
     width = 8
-
-def padding(val):
-    class _padding(int):
-        width = val
-    return _padding(0)
+    def __init__(self, val):
+        self.signedness = 's' if val < 0 else 'u'
+    def __new__(cls, val):
+        return int.__new__(cls, val)
+        
+class padding(int):
+    signedness = 'u'
+    def __init__(self, length):
+        self.width = length
+    def __new__(cls, length):
+        return int.__new__(cls, 0)
 
 def decode_operand(s):
     if s[0] == 'r':
@@ -44,7 +52,7 @@ class instruction_base (object):
             byte_len += p.width
             byte_assembly.append(p)
             if byte_len % 8 == 0:
-                fmt = ''.join('>u{:d}'.format(p.width) for p in byte_assembly) + '>'
+                fmt = ''.join('>{:s}{:d}'.format(p.signedness, p.width) for p in byte_assembly) + '<'
                 bytes_out.append(bitstruct.pack(fmt, *byte_assembly[::-1]))
                 byte_assembly = []
                 byte_len = 0
