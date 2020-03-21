@@ -14,13 +14,15 @@ set r4 r2
 set r5 r2
 hsv2rgb r3 r4 r5
 write r3 r4 r5 0
-add r0 16
+add r0 2
 
 set r3 r1
 set r4 r2
 set r5 r2
 hsv2rgb r3 r4 r5
 write r3 r4 r5 1
-add r1 16
+add r1 1
+
+nop 7
 
 goto :loop

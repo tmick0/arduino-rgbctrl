@@ -21,6 +21,9 @@ write r3 r4 r5 0
 # increment value
 add r0 r1
 
+# delay
+nop 7
+
 # if value reached 0 or 255, reverse direction
 cmp r0 r6
 breq :reverse
