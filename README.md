@@ -71,8 +71,7 @@ The assembler currently has a very basic syntax:
 - The first token is an opcode, and subsequent tokens are operands
 - If an operand starts with `r`, it is a register; if it starts with a `:`, it is a label; otherwise, it is an immediate
 
-Note the assembler currently does only a single pass over the input, so branch instructions must refer to labels that
-occur previously in the source. The virtual machine itself does support forward branching.
+The assembler runs two passes over the source: first, it determines the instruction addresses of all labels; then, it generates code.
 
 The assembler depends on the package [bitstruct](https://pypi.org/project/bitstruct/).
 

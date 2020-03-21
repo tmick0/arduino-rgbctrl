@@ -29,10 +29,12 @@ class padding(int):
 
 LABELS = {}
 
-def decode_operand(s):
+def decode_operand(s, ignore_labels=False):
     if s[0] == 'r':
         return register(int(s[1:]))
     elif s[0] == ':':
+        if ignore_labels:
+            return address(0)
         return address(LABELS[s[1:]])
     else:
         return immediate(int(s))
@@ -142,22 +144,37 @@ def main():
 
     args = parser.parse_args()
 
-    with open(args.output, 'wb') as fho, open(args.input, 'r') as fhi:
+    # first pass: calculate label addresses
+    with open(args.input, 'r') as fhi:
+        ip = 0
         for i, line in enumerate(fhi):
             try:
                 line = line.strip()
-
                 if len(line) == 0 or line[0] == '#':
                     continue
-                
                 if line[0] == ':':
-                    LABELS[line[1:]] = fho.tell()
+                    LABELS[line[1:]] = ip
                     continue
+                parts = line.split(' ')
+                instr = INSTRUCTIONS[parts[0]]
+                opers = [decode_operand(s, True) for s in parts[1:]]
+                v = instr(*opers)
+                ip += len(v.bytes())
+            except:
+                print("failed on line {:d}: {}".format(i, line))
+                raise
 
+    # second pass: generate code
+    with open(args.input, 'r') as fhi, open(args.output, 'wb') as fho:
+        ip = 0
+        for i, line in enumerate(fhi):
+            try:
+                line = line.strip()
+                if len(line) == 0 or line[0] == '#' or line[0] == ':':
+                    continue
                 parts = line.split(' ')
                 instr = INSTRUCTIONS[parts[0]]
                 opers = [decode_operand(s) for s in parts[1:]]
-                
                 v = instr(*opers)
                 fho.write(v.bytes())
             except:
