@@ -1,12 +1,13 @@
 #ifndef rgbvm_h_
 #define rgbvm_h_
 
+#include "stdint.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-typedef void (*rgbvm_rgb_output)(unsigned char, unsigned char, unsigned char,
-                                 unsigned char);
+typedef void (*rgbvm_rgb_output)(uint8_t, uint8_t, uint8_t, uint8_t);
 
 enum rgbvm_opcode {
   // no op
@@ -67,8 +68,8 @@ struct rgbvm_arithmetic_instruction {
   enum rgbvm_opcode opcode : 4;
   enum rgbvm_reg dst : 4;
   enum rgbvm_reg src : 4;
-  unsigned char padding : 4;
-  unsigned char imm[];
+  uint8_t padding : 4;
+  uint8_t imm[];
 };
 
 struct rgbvm_output_instruction {
@@ -76,7 +77,7 @@ struct rgbvm_output_instruction {
   enum rgbvm_reg srcr : 4;
   enum rgbvm_reg srcg : 4;
   enum rgbvm_reg srcb : 4;
-  unsigned char output;
+  uint8_t output;
 };
 
 struct rgbvm_hsv2rgb_instruction {
@@ -88,25 +89,25 @@ struct rgbvm_hsv2rgb_instruction {
 
 struct rgbvm_branch_instruction {
   enum rgbvm_opcode opcode : 4;
-  unsigned short padding : 4;
-  unsigned short dest;
+  uint16_t padding : 4;
+  uint16_t dest;
 };
 
 struct rgbvm_state {
   // instruction pointer
-  unsigned short ip;
+  uint16_t ip;
 
   // length of code segment (after which ip will reset to 0)
-  unsigned short ip_max;
+  uint16_t ip_max;
 
   // 15 "general purpose" registers
-  unsigned char reg[15];
+  uint8_t reg[15];
 
   // flag register
   enum rgbvm_flag flag;
 };
 
-void rgbvm_state_init(struct rgbvm_state *vm, unsigned int code_len);
+void rgbvm_state_init(struct rgbvm_state *vm, const uint16_t code_len);
 
 enum rgbvm_status rgbvm_apply(rgbvm_rgb_output output, struct rgbvm_state *vm,
                               const struct rgbvm_instruction *inst);
