@@ -2,14 +2,29 @@
 
 This is intended to become an Arduino program implementing a scriptable RGB controller that can be reprogrammed over a serial device.
 
-Goals:
+## Overview
 
-- Implement a "virtual machine" that interprets bytecode corresponding to commands which manipulate the state of addressable RGB LEDs.
-- Implement an actual RGB LED driver (target platform TBD).
-- Store bytecode in EEPROM and have the MCU read it back into memory at startup.
-- Allow bytecode updates over the serial interface to be stored in EEPROM.
-- Implement an assembler that can translate mnemonics to bytecode.
+I wanted an RGB controller that would be easy to reprogram from any device or operating system. So, I implemented a virtual machine
+on an Arduino and taught it to do stuff to LEDs.
+
+Complete features:
+
+- A virtual machine that interprets bytecode which manipulates the state of RGB values.
+- EEPROM bytecode storage that the MCU reads back into memory at startup.
+- Serial bytecode updater with persistence in EEPROM.
+- An assembler that can translate mnemonics to bytecode.
+- A simple PWM based driver for controlling an analog RGB LED.
+
+TODO:
+
+- Implement an actual addressable RGB LED driver (target platform TBD).
 - Implement a GUI for easily programming and flashing the bytecode.
+
+## Usage
+
+Pins 9, 10, and 11 are currently set as the R, G, and B channels respectively.
+
+Bytecode can be generated with [assemble.py](tools/assemble.py) and flashed to the Arduino with [flash.py](tools/flash.py).
 
 ## Building
 
