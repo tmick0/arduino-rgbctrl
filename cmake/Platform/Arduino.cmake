@@ -402,6 +402,7 @@ function(GENERATE_ARDUINO_LIBRARY INPUT_NAME)
                 LINK_FLAGS "${ARDUINO_LINK_FLAGS} ${LINK_FLAGS}")
 
     target_link_libraries(${INPUT_NAME} ${ALL_LIBS} "-lc -lm")
+    target_include_directories(${INPUT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 endfunction()
 
 #=============================================================================#
