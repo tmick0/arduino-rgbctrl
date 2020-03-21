@@ -156,6 +156,9 @@ int rgbvm_decode_arithmetic(struct rgbvm_state *vm,
   case RGBVM_OP_MOD:
     *op = &rgbvm_mod_impl;
     break;
+  case RGBVM_OP_CMP:
+    *op = &rgbvm_cmp_impl;
+    break;
   default:
     return 1;
   }
