@@ -1,38 +1,69 @@
 
-#include "Arduino.h"
+#include <Arduino.h>
+#include <EEPROM.h>
+
+#include "proto.h"
 #include "rgbvm.h"
 
-rgbvm_state vm;
-unsigned char code[] = {0x01, 0x0f, 0x00, 0x11, 0x0f, 0xb1, 0x21, 0x0f,
-                        0xff, 0x31, 0x00, 0x41, 0x02, 0x51, 0x02, 0x37,
-                        0x54, 0x36, 0x54, 0x00, 0x02, 0x0f, 0x10, 0x31,
-                        0x01, 0x41, 0x02, 0x51, 0x02, 0x37, 0x54, 0x36,
-                        0x54, 0x01, 0x12, 0x0f, 0x10, 0x08, 0x09, 0x00};
+struct State {
+  proto_state_machine psm;
+  rgbvm_state vm;
+  uint8_t code[128];
+};
+
+State s;
+
+const int rpin = 9;
+const int gpin = 10;
+const int bpin = 11;
 
 void setup() {
   Serial.begin(9600);
-  Serial.println("hello world");
+  pinMode(rpin, OUTPUT);
+  pinMode(gpin, OUTPUT);
+  pinMode(bpin, OUTPUT);
 
-  rgbvm_state_init(&vm, 40);
+  const uint16_t code_len = (EEPROM.read(0) << 0) | (EEPROM.read(1) << 8);
+  for (int i = 0; i < code_len; ++i) {
+    s.code[i] = EEPROM.read(i + sizeof(uint16_t));
+  }
+
+  proto_state_machine_init(&s.psm);
+  rgbvm_state_init(&s.vm, code_len);
 }
 
-void output(unsigned char r, unsigned char g, unsigned char b,
-            unsigned char o) {
-  Serial.print("output ");
-  Serial.print((int)o);
-  Serial.print(": ");
-  Serial.print((int)r);
-  Serial.print(" ");
-  Serial.print((int)g);
-  Serial.print(" ");
-  Serial.print((int)b);
-  Serial.println("");
+void output(uint8_t r, uint8_t g, uint8_t b, uint8_t o) {
+  if (o == 0) {
+    analogWrite(rpin, r);
+    analogWrite(gpin, g);
+    analogWrite(bpin, b);
+  }
+}
+
+void write_eeprom(const proto_state_machine *psm) {
+  rgbvm_state_init(&s.vm, s.psm.size);
+  EEPROM.write(0, (s.psm.size & (0x00ff)) >> 0);
+  EEPROM.write(1, (s.psm.size & (0xff00)) >> 8);
+  for (int i = 0; i < s.psm.size; ++i) {
+    s.code[i] = s.psm.code[i];
+    EEPROM.write(i + 2, s.psm.code[i]);
+  }
 }
 
 void loop() {
-  if (rgbvm_apply(delay, output, &vm, (const rgbvm_instruction *)&code[vm.ip]) !=
-      RGBVM_STATUS_OK) {
-    Serial.print("* FAILURE AT ip = ");
-    Serial.println(vm.ip);
+  if (Serial.available() > 0) {
+    proto_msg msg;
+    if (proto_state_machine_ingest(&s.psm, Serial.read(), &msg, write_eeprom)) {
+      Serial.write((uint8_t)msg);
+    }
+  }
+
+  if (s.psm.state == PROTO_STATE_INIT) {
+    if (rgbvm_apply(delay, output, &s.vm,
+                    (const rgbvm_instruction *)&s.code[s.vm.ip]) !=
+        RGBVM_STATUS_OK) {
+      Serial.print("* FAILURE AT ip = ");
+      Serial.println(s.vm.ip);
+    }
   }
 }

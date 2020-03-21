@@ -9,4 +9,5 @@ generate_arduino_library(proto_lib
 
 generate_arduino_firmware(rgbvm_main
     SRCS main.cpp
-    LIBS rgbvm_lib)
+    LIBS rgbvm_lib proto_lib
+    ARDLIBS EEPROM)
