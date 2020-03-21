@@ -55,7 +55,7 @@ Currently, rgbvm does not support branching and runs a loop over the bytecode st
 | write    | rr rg rb oimm    | write rgb value from registers to output identified by immediate |
 | hsv2rgb  | rh rs rv         | convert rgb values in registers to hsv (inplace)                 |
 
-Take a look at [scripts/hue_cycle.rgbvm](hue_cycle.rgbvm) for a usage example.
+Take a look at [hue_cycle.rgbvm](scripts/hue_cycle.rgbvm) for a usage example.
 
 The assembler currently has a very basic syntax:
 
