@@ -30,7 +30,7 @@ void output(unsigned char r, unsigned char g, unsigned char b,
 }
 
 void loop() {
-  if (rgbvm_apply(output, &vm, (const rgbvm_instruction *)&code[vm.ip]) !=
+  if (rgbvm_apply(delay, output, &vm, (const rgbvm_instruction *)&code[vm.ip]) !=
       RGBVM_STATUS_OK) {
     Serial.print("* FAILURE AT ip = ");
     Serial.println(vm.ip);

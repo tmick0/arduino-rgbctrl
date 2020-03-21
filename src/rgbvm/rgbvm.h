@@ -8,6 +8,7 @@ extern "C" {
 #endif
 
 typedef void (*rgbvm_rgb_output)(uint8_t, uint8_t, uint8_t, uint8_t);
+typedef void (*rgbvm_delay)(unsigned long);
 
 enum rgbvm_opcode {
   // no op
@@ -64,6 +65,11 @@ struct rgbvm_instruction {
   enum rgbvm_opcode opcode : 4;
 };
 
+struct rgbvm_nop_instruction {
+  enum rgbvm_opcode opcode : 4;
+  uint8_t delay : 4;
+};
+
 struct rgbvm_arithmetic_instruction {
   enum rgbvm_opcode opcode : 4;
   enum rgbvm_reg dst : 4;
@@ -109,7 +115,8 @@ struct rgbvm_state {
 
 void rgbvm_state_init(struct rgbvm_state *vm, const uint16_t code_len);
 
-enum rgbvm_status rgbvm_apply(rgbvm_rgb_output output, struct rgbvm_state *vm,
+enum rgbvm_status rgbvm_apply(rgbvm_delay delay, rgbvm_rgb_output output,
+                              struct rgbvm_state *vm,
                               const struct rgbvm_instruction *inst);
 
 #ifdef __cplusplus

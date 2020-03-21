@@ -75,8 +75,9 @@ class instruction_base (object):
 @instruction("nop")
 class instruction_nop (instruction_base):
     opcode = opcode(0x0)
-    def op(self):
-        pass
+    def __init__(self, delay=immediate(0)):
+        delay.width = 4
+        super().__init__(delay)
 
 class instruction_arith_base (instruction_base):
     def __init__(self, dst, src):

@@ -47,7 +47,7 @@ Execution starts at instruction offset 0, resetting to 0 if the end of the progr
 
 | Mnemonic | Operands         | Description                                                      |
 |----------|------------------|------------------------------------------------------------------|
-| nop      |                  | no operation                                                     |
+| nop      | \[imm\]          | no operation -- if imm specified and nonzero, sleep 2^(imm-1) ms |
 | set      | rdst (rsrc\|imm) | load register rdst from rsrc or immediate                        |
 | add      | rdst (rsrc\|imm) | add to rdst from rsrc or immediate                               |
 | mul      | rdst (rsrc\|imm) | multiply rdst by rsrc or immediate                               |

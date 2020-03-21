@@ -243,12 +243,19 @@ void rgbvm_hsv2rgb_impl(uint8_t *h_r, uint8_t *s_g, uint8_t *v_b) {
   }
 }
 
-enum rgbvm_status rgbvm_apply(rgbvm_rgb_output output, struct rgbvm_state *vm,
+enum rgbvm_status rgbvm_apply(rgbvm_delay delay, rgbvm_rgb_output output,
+                              struct rgbvm_state *vm,
                               const struct rgbvm_instruction *inst) {
   switch (inst->opcode) {
-  case RGBVM_OP_NOP:
+  case RGBVM_OP_NOP: {
+    const struct rgbvm_nop_instruction *i =
+        (const struct rgbvm_nop_instruction *)inst;
+    if (i->delay) {
+      delay(1 << (i->delay - 1));
+    }
     rgbvm_increment_ip(vm, 1);
     return RGBVM_STATUS_OK;
+  }
   case RGBVM_OP_SET:
   case RGBVM_OP_ADD:
   case RGBVM_OP_MUL:
