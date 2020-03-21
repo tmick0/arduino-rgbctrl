@@ -16,6 +16,10 @@ class immediate(int):
     def __new__(cls, val):
         return int.__new__(cls, val)
         
+class address(int):
+    signedness = 'u'
+    width = 16
+
 class padding(int):
     signedness = 'u'
     def __init__(self, length):
@@ -23,9 +27,13 @@ class padding(int):
     def __new__(cls, length):
         return int.__new__(cls, 0)
 
+LABELS = {}
+
 def decode_operand(s):
     if s[0] == 'r':
         return register(int(s[1:]))
+    elif s[0] == ':':
+        return address(LABELS[s[1:]])
     else:
         return immediate(int(s))
 
@@ -40,7 +48,6 @@ def instruction(mnemonic):
 class instruction_base (object):
     def __init__(self, *args):
         self.args = args
-        print("assembling instruction: {} {}".format(self.opcode, self.args))
     
     def bytes(self):
         parts = [self.opcode] + list(self.args)
@@ -61,7 +68,6 @@ class instruction_base (object):
             raise RuntimeError("got an incomplete byte")
 
         res = b''.join(bytes_out)
-        print("args: {} -> {}".format(parts, res.hex()))
         return res
 
 @instruction("nop")
@@ -97,6 +103,10 @@ class instruction_div (instruction_arith_base):
 class instruction_mod (instruction_arith_base):
     opcode = opcode(0x5)
 
+@instruction("cmp")
+class instruction_cmp (instruction_arith_base):
+    opcode = opcode(0x9)
+
 @instruction("write")
 class instruction_write (instruction_base):
     opcode = opcode(0x6)
@@ -108,6 +118,22 @@ class instruction_hsv2rgb (instruction_base):
     opcode = opcode(0x7)
     def __init__(self, r, g, b):
         super().__init__(r, g, b)
+
+class branch_instruction_base (instruction_base):
+    def __init__(self, addr):
+        super().__init__(padding(4), addr)
+
+@instruction("goto")
+class instruction_goto (branch_instruction_base):
+    opcode = opcode(0x8)
+
+@instruction("brne")
+class instruction_goto (branch_instruction_base):
+    opcode = opcode(0xa)
+
+@instruction("breq")
+class instruction_goto (branch_instruction_base):
+    opcode = opcode(0xb)
 
 def main():
     parser = argparse.ArgumentParser()
@@ -124,6 +150,10 @@ def main():
                 if len(line) == 0 or line[0] == '#':
                     continue
                 
+                if line[0] == ':':
+                    LABELS[line[1:]] = fho.tell()
+                    continue
+
                 parts = line.split(' ')
                 instr = INSTRUCTIONS[parts[0]]
                 opers = [decode_operand(s) for s in parts[1:]]

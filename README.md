@@ -38,9 +38,10 @@ make
 
 ## Virtual machine
 
-rgb-ctrl is based on a virtual machine called rgbvm. It implements an application-specific instruction set, having 15 registers, a few basic arithmetic operations, color space conversion operations, and an output operation.
+rgb-ctrl is based on an 8-bit virtual machine called rgbvm. It implements an application-specific instruction set, having 15 general purpose registers,
+a flag register, an instruction pointer register, a few basic arithmetic operations, color space conversion operations, branching operations, and an output operation.
 
-Currently, rgbvm does not support branching and runs a loop over the bytecode starting from instruction offset 0, resetting to 0 when reaching the end of the program.
+Execution starts at instruction offset 0, resetting to 0 if the end of the program is reached.
 
 ### Opcodes
 
@@ -52,18 +53,23 @@ Currently, rgbvm does not support branching and runs a loop over the bytecode st
 | mul      | rdst (rsrc\|imm) | multiply rdst by rsrc or immediate                               |
 | div      | rdst (rsrc\|imm) | divide rdst by rsrc or immediate                                 |
 | mod      | rdst (rsrc\|imm) | modulo rdst by rsrc or immediate                                 |
+| cmp      | rdst (rsrc\|imm) | compare rdst to imm and store the result in flags                |
 | write    | rr rg rb oimm    | write rgb value from registers to output identified by immediate |
 | hsv2rgb  | rh rs rv         | convert rgb values in registers to hsv (inplace)                 |
+| goto     | address          | move the instruction pointer to address                          |
+| brne     | address          | move the ip to address if last comparison was not equal          |
+| breq     | address          | move the ip to address if last comparison was equal              |
 
-Take a look at [hue_cycle.rgbvm](scripts/hue_cycle.rgbvm) for a usage example.
+Take a look at [hue_cycle.rgbvm](scripts/hue_cycle.rgbvm) or [hue_cycle.rgbvm](scripts/value_pulse.rgbvm) for usage examples.
 
 The assembler currently has a very basic syntax:
 
 - A line starting with `#` is a comment
+- A line starting with `:` is a label
 - Every other non-empty line is expected to describe an instruction
 - Each instruction is a sequence of space-separated tokens
 - The first token is an opcode, and subsequent tokens are operands
-- If an operand starts with `r`, it is a register; otherwise, it is an immediate
+- If an operand starts with `r`, it is a register; if it starts with a `:`, it is a label; otherwise, it is an immediate
 
 The assembler depends on the package [bitstruct](https://pypi.org/project/bitstruct/).
 

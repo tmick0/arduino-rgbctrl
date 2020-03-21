@@ -3,6 +3,8 @@
 typedef void (*rgbvm_arith_op_impl)(struct rgbvm_state *, unsigned char *,
                                     unsigned char);
 
+typedef int (*rgbvm_branch_op_impl)(struct rgbvm_state *);
+
 void rgbvm_state_init(struct rgbvm_state *vm, unsigned int code_len);
 
 unsigned char *rgbvm_decode_reg(struct rgbvm_state *vm, enum rgbvm_reg reg);
@@ -21,15 +23,26 @@ void rgbvm_div_impl(struct rgbvm_state *vm, unsigned char *dest,
                     unsigned char src);
 void rgbvm_mod_impl(struct rgbvm_state *vm, unsigned char *dest,
                     unsigned char src);
+void rgbvm_cmp_impl(struct rgbvm_state *vm, unsigned char *dest,
+                    unsigned char src);
+
+int rgbvm_goto_impl(struct rgbvm_state *vm);
+int rgbvm_breq_impl(struct rgbvm_state *vm);
+int rgbvm_brne_impl(struct rgbvm_state *vm);
 
 int rgbvm_decode_arithmetic(struct rgbvm_state *vm,
                             const struct rgbvm_arithmetic_instruction *inst,
                             unsigned char **dest, unsigned char *src,
                             rgbvm_arith_op_impl *op, unsigned char *size);
 
+int rgbvm_decode_branch(struct rgbvm_state *vm,
+                        const struct rgbvm_branch_instruction *inst,
+                        rgbvm_branch_op_impl *cond, unsigned char *size);
+
 void rgbvm_state_init(struct rgbvm_state *vm, unsigned int code_len) {
   vm->ip = 0;
   vm->ip_max = code_len;
+  vm->flag = RGBVM_FLAG_EMPTY;
   for (char i = 0; i < RGBVM_REG_IM; ++i) {
     vm->reg[i] = 0;
   }
@@ -103,6 +116,25 @@ void rgbvm_mod_impl(struct rgbvm_state *vm, unsigned char *dest,
   *dest %= src;
 }
 
+void rgbvm_cmp_impl(struct rgbvm_state *vm, unsigned char *dest,
+                    unsigned char src) {
+  if (*dest == src) {
+    vm->flag |= RGBVM_FLAG_EQUAL;
+  } else {
+    vm->flag &= ~RGBVM_FLAG_EQUAL;
+  }
+}
+
+int rgbvm_goto_impl(struct rgbvm_state *vm) { return 1; }
+
+int rgbvm_breq_impl(struct rgbvm_state *vm) {
+  return (vm->flag & RGBVM_FLAG_EQUAL) != 0;
+}
+
+int rgbvm_brne_impl(struct rgbvm_state *vm) {
+  return (vm->flag & RGBVM_FLAG_EQUAL) == 0;
+}
+
 int rgbvm_decode_arithmetic(struct rgbvm_state *vm,
                             const struct rgbvm_arithmetic_instruction *inst,
                             unsigned char **dest, unsigned char *src,
@@ -139,6 +171,26 @@ int rgbvm_decode_arithmetic(struct rgbvm_state *vm,
 
   *size += 2;
 
+  return 0;
+}
+
+int rgbvm_decode_branch(struct rgbvm_state *vm,
+                        const struct rgbvm_branch_instruction *inst,
+                        rgbvm_branch_op_impl *cond, unsigned char *size) {
+  *size = 3;
+  switch (inst->opcode) {
+  case RGBVM_OP_GOTO:
+    *cond = &rgbvm_goto_impl;
+    break;
+  case RGBVM_OP_BRNE:
+    *cond = &rgbvm_brne_impl;
+    break;
+  case RGBVM_OP_BREQ:
+    *cond = &rgbvm_breq_impl;
+    break;
+  default:
+    return 1;
+  }
   return 0;
 }
 
@@ -214,7 +266,8 @@ enum rgbvm_status rgbvm_apply(rgbvm_rgb_output output, struct rgbvm_state *vm,
   case RGBVM_OP_ADD:
   case RGBVM_OP_MUL:
   case RGBVM_OP_DIV:
-  case RGBVM_OP_MOD: {
+  case RGBVM_OP_MOD:
+  case RGBVM_OP_CMP: {
     unsigned char *dest;
     unsigned char src;
     unsigned char size;
@@ -251,6 +304,23 @@ enum rgbvm_status rgbvm_apply(rgbvm_rgb_output output, struct rgbvm_state *vm,
     }
     rgbvm_hsv2rgb_impl(h_r, s_g, v_b);
     rgbvm_increment_ip(vm, 2);
+    return RGBVM_STATUS_OK;
+  }
+  case RGBVM_OP_GOTO:
+  case RGBVM_OP_BREQ:
+  case RGBVM_OP_BRNE: {
+    struct rgbvm_branch_instruction *i =
+        (struct rgbvm_branch_instruction *)inst;
+    rgbvm_branch_op_impl condition;
+    unsigned char size;
+    if (rgbvm_decode_branch(vm, i, &condition, &size)) {
+      return RGBVM_STATUS_ILL;
+    }
+    if (condition(vm)) {
+      vm->ip = i->dest;
+    } else {
+      rgbvm_increment_ip(vm, size);
+    }
     return RGBVM_STATUS_OK;
   }
   default:

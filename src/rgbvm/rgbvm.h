@@ -18,12 +18,18 @@ enum rgbvm_opcode {
   RGBVM_OP_MUL = 0x3,
   RGBVM_OP_DIV = 0x4,
   RGBVM_OP_MOD = 0x5,
+  RGBVM_OP_CMP = 0x9,
 
   // i/o operations
   RGBVM_OP_WRITE = 0x6,
 
   // color manipulation
-  RGBVM_OP_HSV2RGB = 0x7
+  RGBVM_OP_HSV2RGB = 0x7,
+
+  // branching
+  RGBVM_OP_GOTO = 0x8,
+  RGBVM_OP_BRNE = 0xa,
+  RGBVM_OP_BREQ = 0xb
 };
 
 enum rgbvm_reg {
@@ -45,6 +51,8 @@ enum rgbvm_reg {
   RGBVM_REG_IM =
       0xf // indicates source operand is an immediate in imm[0], not a register
 };
+
+enum rgbvm_flag { RGBVM_FLAG_EMPTY = 0x0, RGBVM_FLAG_EQUAL = 0x1 };
 
 enum rgbvm_status {
   RGBVM_STATUS_OK = 0,
@@ -78,15 +86,24 @@ struct rgbvm_hsv2rgb_instruction {
   enum rgbvm_reg v_b : 4;
 };
 
+struct rgbvm_branch_instruction {
+  enum rgbvm_opcode opcode : 4;
+  unsigned short padding : 4;
+  unsigned short dest;
+};
+
 struct rgbvm_state {
   // instruction pointer
-  unsigned int ip;
+  unsigned short ip;
 
   // length of code segment (after which ip will reset to 0)
-  unsigned int ip_max;
+  unsigned short ip_max;
 
   // 15 "general purpose" registers
   unsigned char reg[15];
+
+  // flag register
+  enum rgbvm_flag flag;
 };
 
 void rgbvm_state_init(struct rgbvm_state *vm, unsigned int code_len);
