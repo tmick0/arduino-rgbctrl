@@ -4,7 +4,8 @@ void proto_state_machine_init(struct proto_state_machine *psm) {
   psm->state = PROTO_STATE_INIT;
 }
 
-int proto_state_machine_ingest(struct proto_state_machine *psm,
+int proto_state_machine_ingest(struct rgbvm_state *vm, uint8_t *code,
+                               struct proto_state_machine *psm,
                                const uint8_t byte, enum proto_msg *res,
                                proto_callback cb) {
   switch (psm->state) {
@@ -18,13 +19,13 @@ int proto_state_machine_ingest(struct proto_state_machine *psm,
     return 1;
   }
   case PROTO_STATE_SIZEL: {
-    ((uint8_t *)&psm->size)[0] = byte;
+    ((uint8_t *)&vm->ip_max)[0] = byte;
     psm->state = PROTO_STATE_SIZEH;
     return 0;
   }
   case PROTO_STATE_SIZEH: {
-    ((uint8_t *)&psm->size)[1] = byte;
-    if (psm->size > 128) {
+    ((uint8_t *)&vm->ip_max)[1] = byte;
+    if (vm->ip_max > 128) {
       psm->state = PROTO_STATE_INIT;
       *res = PROTO_MSG_ERR;
       return 1;
@@ -35,8 +36,8 @@ int proto_state_machine_ingest(struct proto_state_machine *psm,
     return 1;
   }
   case PROTO_STATE_CODE: {
-    psm->code[psm->offset++] = byte;
-    if (psm->offset == psm->size) {
+    code[psm->offset++] = byte;
+    if (psm->offset == vm->ip_max) {
       cb(psm);
       psm->state = PROTO_STATE_INIT;
       *res = PROTO_MSG_OK;

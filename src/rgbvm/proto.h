@@ -5,6 +5,7 @@
 extern "C" {
 #endif
 
+#include "rgbvm.h"
 #include "stdint.h"
 
 enum proto_msg {
@@ -22,16 +23,15 @@ enum proto_state {
 
 struct proto_state_machine {
   enum proto_state state;
-  uint16_t size;
   uint16_t offset;
-  uint8_t code[128];
 };
 
 void proto_state_machine_init(struct proto_state_machine *psm);
 
 typedef void (*proto_callback)(const struct proto_state_machine *);
 
-int proto_state_machine_ingest(struct proto_state_machine *psm,
+int proto_state_machine_ingest(struct rgbvm_state *vm, uint8_t *code,
+                               struct proto_state_machine *psm,
                                const uint8_t byte, enum proto_msg *res,
                                proto_callback cb);
 
