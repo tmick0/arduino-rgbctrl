@@ -20,6 +20,7 @@ set r4 r2
 set r5 r0
 hsv2rgb r3 r4 r5
 write r3 r4 r5 0
+send 0
 
 # increment value
 add r0 r1
