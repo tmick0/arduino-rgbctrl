@@ -297,7 +297,7 @@ enum rgbvm_status rgbvm_apply(rgbvm_delay delay, struct rgbvm_state *vm,
     if (init == 0) {
       return RGBVM_STATUS_ILL;
     }
-    init(&vm->outputs[i->channel]);
+    init(&vm->outputs[i->channel], i->arg);
     rgbvm_increment_ip(vm, 2);
     return RGBVM_STATUS_OK;
   }

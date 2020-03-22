@@ -19,7 +19,7 @@ struct rgbvm_driver;
 
 typedef void (*driver_write)(struct rgbvm_driver *, const uint8_t,
                              const uint8_t, const uint8_t);
-typedef void (*driver_init)(struct rgbvm_driver *);
+typedef void (*driver_init)(struct rgbvm_driver *, const uint8_t arg);
 typedef void (*driver_send)(struct rgbvm_driver *);
 
 struct rgb_value {
@@ -29,6 +29,7 @@ struct rgb_value {
 struct rgbvm_driver {
   driver_write write;
   driver_send send;
+  uint8_t arg;
   uint8_t ptr;
   struct rgb_value buffer[128];
 };

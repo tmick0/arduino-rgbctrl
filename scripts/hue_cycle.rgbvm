@@ -7,7 +7,7 @@ set r0 0
 set r2 255
 
 # initialize channel 0 with the analog driver
-init 1 0
+init 1 0 0
 
 :loop
 

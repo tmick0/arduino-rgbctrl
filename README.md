@@ -74,23 +74,22 @@ Execution starts at instruction offset 0, resetting to 0 if the end of the progr
 
 ### Opcodes
 
-| Mnemonic | Operands         | Description                                                      |
-|----------|------------------|------------------------------------------------------------------|
-| nop      | \[imm\]          | no operation -- if imm specified and nonzero, sleep 2^(imm-1) ms |
-| set      | rdst (rsrc\|imm) | load register rdst from rsrc or immediate                        |
-| add      | rdst (rsrc\|imm) | add to rdst from rsrc or immediate                               |
-| mul      | rdst (rsrc\|imm) | multiply rdst by rsrc or immediate                               |
-| div      | rdst (rsrc\|imm) | divide rdst by rsrc or immediate                                 |
-| mod      | rdst (rsrc\|imm) | modulo rdst by rsrc or immediate                                 |
-| cmp      | r0 (r1\|imm)     | compare r0 to r1 or imm and store the result in flags            |
-| goto     | address          | move the instruction pointer to address                          |
-| brne     | address          | move the ip to address if last comparison was not equal          |
-| breq     | address          | move the ip to address if last comparison was equal              |
-| hsv2rgb  | rh rs rv         | convert rgb values in registers to hsv (inplace)                 |
-| init     | immd, immc       | initialize output channel immc with driver number immd           |
-| write    | rr rg rb immc    | buffer rgb value from registers on output channel immc           |
-| send     | immc             | activate the buffered output of immc                             |
-| 
+| Mnemonic | Operands           | Description                                                                    |
+|----------|--------------------|--------------------------------------------------------------------------------|
+| nop      | \[imm\]            | no operation -- if imm specified and nonzero, sleep 2^(imm-1) ms               |
+| set      | rdst (rsrc\|imm)   | load register rdst from rsrc or immediate                                      |
+| add      | rdst (rsrc\|imm)   | add to rdst from rsrc or immediate                                             |
+| mul      | rdst (rsrc\|imm)   | multiply rdst by rsrc or immediate                                             |
+| div      | rdst (rsrc\|imm)   | divide rdst by rsrc or immediate                                               |
+| mod      | rdst (rsrc\|imm)   | modulo rdst by rsrc or immediate                                               |
+| cmp      | r0 (r1\|imm)       | compare r0 to r1 or imm and store the result in flags                          |
+| goto     | address            | move the instruction pointer to address                                        |
+| brne     | address            | move the ip to address if last comparison was not equal                        |
+| breq     | address            | move the ip to address if last comparison was equal                            |
+| hsv2rgb  | rh rs rv           | convert rgb values in registers to hsv (inplace)                               |
+| init     | immd immc \[immf\] | initialize output channel immc with driver number immd and optional flags immf |
+| write    | rr rg rb immc      | buffer rgb value from registers on output channel immc                         |
+| send     | immc               | activate the buffered output of immc                                           |
 
 Take a look at [hue_cycle.rgbvm](scripts/hue_cycle.rgbvm) or [hue_cycle.rgbvm](scripts/value_pulse.rgbvm) for usage examples.
 

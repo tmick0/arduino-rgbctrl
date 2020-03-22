@@ -93,7 +93,7 @@ struct rgbvm_init_instruction {
   enum rgbvm_opcode opcode : 4;
   enum driver_type driver : 4;
   uint8_t channel : 2;
-  uint8_t padding : 6;
+  uint8_t arg : 6;
 };
 
 struct rgbvm_send_instruction {

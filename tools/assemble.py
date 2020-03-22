@@ -120,10 +120,11 @@ class instruction_write (instruction_base):
 @instruction("init")
 class instruction_init (instruction_base):
     opcode = opcode(0xc)
-    def __init__(self, driver, channel):
+    def __init__(self, driver, channel, arg=immediate(0)):
+        arg.width = 6
         driver.width = 4
         channel.width = 2
-        super().__init__(driver, channel, padding(6))
+        super().__init__(driver, channel, arg)
 
 @instruction("send")
 class instruction_send (instruction_base):

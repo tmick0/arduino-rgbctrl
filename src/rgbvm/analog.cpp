@@ -6,9 +6,10 @@ const int rpin = 9;
 const int gpin = 10;
 const int bpin = 11;
 
-void analog_init(struct rgbvm_driver *driver) {
+void analog_init(struct rgbvm_driver *driver, const uint8_t arg) {
   driver->write = analog_write;
   driver->send = analog_send;
+  driver->arg = arg;
   driver->ptr = 0;
   pinMode(rpin, OUTPUT);
   pinMode(gpin, OUTPUT);
