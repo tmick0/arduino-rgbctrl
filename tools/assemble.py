@@ -61,8 +61,9 @@ class instruction_base (object):
             byte_len += p.width
             byte_assembly.append(p)
             if byte_len % 8 == 0:
+                byte_assembly = byte_assembly[::-1]
                 fmt = ''.join('>{:s}{:d}'.format(p.signedness, p.width) for p in byte_assembly) + '<'
-                bytes_out.append(bitstruct.pack(fmt, *byte_assembly[::-1]))
+                bytes_out.append(bitstruct.pack(fmt, *byte_assembly))
                 byte_assembly = []
                 byte_len = 0
 
