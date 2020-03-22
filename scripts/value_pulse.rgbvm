@@ -11,6 +11,9 @@ set r2 0
 # static 255
 set r6 255
 
+# initialize channel 0 with the analog driver
+init 1 0
+
 :loop
 set r3 r2
 set r4 r2

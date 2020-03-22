@@ -117,6 +117,21 @@ class instruction_write (instruction_base):
     def __init__(self, r, g, b, o):
         super().__init__(r, g, b, o)
 
+@instruction("init")
+class instruction_init (instruction_base):
+    opcode = opcode(0xc)
+    def __init__(self, driver, channel):
+        driver.width = 4
+        channel.width = 2
+        super().__init__(driver, channel, padding(6))
+
+@instruction("send")
+class instruction_send (instruction_base):
+    opcode = opcode(0xd)
+    def __init__(self, channel):
+        channel.width = 2
+        super().__init__(channel, padding(2))
+
 @instruction("hsv2rgb")
 class instruction_hsv2rgb (instruction_base):
     opcode = opcode(0x7)

@@ -243,8 +243,7 @@ void rgbvm_hsv2rgb_impl(uint8_t *h_r, uint8_t *s_g, uint8_t *v_b) {
   }
 }
 
-enum rgbvm_status rgbvm_apply(rgbvm_delay delay, rgbvm_rgb_output output,
-                              struct rgbvm_state *vm,
+enum rgbvm_status rgbvm_apply(rgbvm_delay delay, struct rgbvm_state *vm,
                               const struct rgbvm_instruction *inst) {
   switch (inst->opcode) {
   case RGBVM_OP_NOP: {
@@ -275,16 +274,42 @@ enum rgbvm_status rgbvm_apply(rgbvm_delay delay, rgbvm_rgb_output output,
     return RGBVM_STATUS_OK;
   }
   case RGBVM_OP_WRITE: {
-    const struct rgbvm_output_instruction *i =
-        (const struct rgbvm_output_instruction *)inst;
+    const struct rgbvm_write_instruction *i =
+        (const struct rgbvm_write_instruction *)inst;
     const uint8_t *r = rgbvm_decode_reg(vm, i->srcr);
     const uint8_t *g = rgbvm_decode_reg(vm, i->srcg);
     const uint8_t *b = rgbvm_decode_reg(vm, i->srcb);
     if (r == 0 || g == 0 || b == 0) {
       return RGBVM_STATUS_ILL;
     }
-    output(*r, *g, *b, i->output);
+    driver_write fn = vm->outputs[i->channel].write;
+    if (fn == 0) {
+      return RGBVM_STATUS_ILL;
+    }
+    fn(&vm->outputs[i->channel], *r, *g, *b);
     rgbvm_increment_ip(vm, 3);
+    return RGBVM_STATUS_OK;
+  }
+  case RGBVM_OP_INIT: {
+    const struct rgbvm_init_instruction *i =
+        (const struct rgbvm_init_instruction *)inst;
+    driver_init init = get_driver(i->driver);
+    if (init == 0) {
+      return RGBVM_STATUS_ILL;
+    }
+    init(&vm->outputs[i->channel]);
+    rgbvm_increment_ip(vm, 2);
+    return RGBVM_STATUS_OK;
+  }
+  case RGBVM_OP_SEND: {
+    const struct rgbvm_send_instruction *i =
+        (const struct rgbvm_send_instruction *)inst;
+    driver_send fn = vm->outputs[i->channel].send;
+    if (fn == 0) {
+      return RGBVM_STATUS_ILL;
+    }
+    fn(&vm->outputs[i->channel]);
+    rgbvm_increment_ip(vm, 1);
     return RGBVM_STATUS_OK;
   }
   case RGBVM_OP_HSV2RGB: {

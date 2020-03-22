@@ -4,8 +4,10 @@
 # we'll fix the saturation and value at 255
 
 set r0 0
-set r1 177
 set r2 255
+
+# initialize channel 0 with the analog driver
+init 1 0
 
 :loop
 
@@ -14,14 +16,8 @@ set r4 r2
 set r5 r2
 hsv2rgb r3 r4 r5
 write r3 r4 r5 0
+send 0
 add r0 2
-
-set r3 r1
-set r4 r2
-set r5 r2
-hsv2rgb r3 r4 r5
-write r3 r4 r5 1
-add r1 1
 
 nop 7
 

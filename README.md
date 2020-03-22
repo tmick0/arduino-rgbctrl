@@ -7,6 +7,9 @@ This is intended to become an Arduino program implementing a scriptable RGB cont
 I wanted an RGB controller that would be easy to reprogram from any device or operating system. So, I implemented a virtual machine
 on an Arduino and taught it to do stuff to LEDs.
 
+The main goal of this project is to provide a more customizable LED controller than off-the-shelf ones, with modular support
+for different types of LED chips.
+
 Complete features:
 
 - A virtual machine that interprets bytecode which manipulates the state of RGB values.
@@ -22,9 +25,18 @@ TODO:
 
 ## Usage
 
-Pins 9, 10, and 11 are currently set as the R, G, and B channels respectively.
+The only driver currently implemented is `analog`, which runs RGB on pins 9, 10, and 11 respectively.
+
+To produce output, an rgbvm program must:
+
+1. Initialize a driver on a channel (`init` instruction)
+2. Write as many pixels of data to that channel as desired (`write` instruction)
+3. Instruct the driver to send the buffered data (`send` instruction)
 
 Bytecode can be generated with [assemble.py](tools/assemble.py) and flashed to the Arduino with [flash.py](tools/flash.py).
+
+If there is existing content in EEPROM, the firmware may malfunction due to attempting to interpret it as bytecode. If this happens, just write
+a simple program to clear the first two bytes of the EEPROM and flash it before attempting to run this software again.
 
 ## Building
 
@@ -36,6 +48,8 @@ cd build
 cmake ..
 make
 ```
+
+The framework conveniently provides  `make upload` to flash the Arduino firmware.
 
 ## Requirements
 
@@ -54,7 +68,7 @@ make
 ## Virtual machine
 
 rgb-ctrl is based on an 8-bit virtual machine called rgbvm. It implements an application-specific instruction set, having 15 general purpose registers,
-a flag register, an instruction pointer register, a few basic arithmetic operations, color space conversion operations, branching operations, and an output operation.
+a flag register, an instruction pointer register, a few basic arithmetic operations, color space conversion operations, branching operations, and output controls.
 
 Execution starts at instruction offset 0, resetting to 0 if the end of the program is reached.
 
@@ -69,11 +83,14 @@ Execution starts at instruction offset 0, resetting to 0 if the end of the progr
 | div      | rdst (rsrc\|imm) | divide rdst by rsrc or immediate                                 |
 | mod      | rdst (rsrc\|imm) | modulo rdst by rsrc or immediate                                 |
 | cmp      | r0 (r1\|imm)     | compare r0 to r1 or imm and store the result in flags            |
-| write    | rr rg rb oimm    | write rgb value from registers to output identified by immediate |
-| hsv2rgb  | rh rs rv         | convert rgb values in registers to hsv (inplace)                 |
 | goto     | address          | move the instruction pointer to address                          |
 | brne     | address          | move the ip to address if last comparison was not equal          |
 | breq     | address          | move the ip to address if last comparison was equal              |
+| hsv2rgb  | rh rs rv         | convert rgb values in registers to hsv (inplace)                 |
+| init     | immd, immc       | initialize output channel immc with driver number immd           |
+| write    | rr rg rb immc    | buffer rgb value from registers on output channel immc           |
+| send     | immc             | activate the buffered output of immc                             |
+| 
 
 Take a look at [hue_cycle.rgbvm](scripts/hue_cycle.rgbvm) or [hue_cycle.rgbvm](scripts/value_pulse.rgbvm) for usage examples.
 

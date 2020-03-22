@@ -13,15 +13,8 @@ struct State {
 
 State s;
 
-const int rpin = 9;
-const int gpin = 10;
-const int bpin = 11;
-
 void setup() {
   Serial.begin(9600);
-  pinMode(rpin, OUTPUT);
-  pinMode(gpin, OUTPUT);
-  pinMode(bpin, OUTPUT);
 
   const uint16_t code_len = (EEPROM.read(0) << 0) | (EEPROM.read(1) << 8);
   for (int i = 0; i < code_len; ++i) {
@@ -30,14 +23,6 @@ void setup() {
 
   proto_state_machine_init(&s.psm);
   rgbvm_state_init(&s.vm, code_len);
-}
-
-void output(uint8_t r, uint8_t g, uint8_t b, uint8_t o) {
-  if (o == 0) {
-    analogWrite(rpin, r);
-    analogWrite(gpin, g);
-    analogWrite(bpin, b);
-  }
 }
 
 void write_eeprom(const proto_state_machine *psm) {
@@ -58,10 +43,10 @@ void loop() {
   }
 
   if (s.psm.state == PROTO_STATE_INIT) {
-    if (rgbvm_apply(delay, output, &s.vm,
+    if (rgbvm_apply(delay, &s.vm,
                     (const rgbvm_instruction *)&s.code[s.vm.ip]) !=
         RGBVM_STATUS_OK) {
-      Serial.print("* FAILURE AT ip = ");
+      Serial.print(F("* FAILURE AT ip = "));
       Serial.println(s.vm.ip);
     }
   }

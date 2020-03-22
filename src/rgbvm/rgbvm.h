@@ -1,13 +1,13 @@
 #ifndef rgbvm_h_
 #define rgbvm_h_
 
+#include "driver.h"
 #include "stdint.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-typedef void (*rgbvm_rgb_output)(uint8_t, uint8_t, uint8_t, uint8_t);
 typedef void (*rgbvm_delay)(unsigned long);
 
 enum rgbvm_opcode {
@@ -24,6 +24,8 @@ enum rgbvm_opcode {
 
   // i/o operations
   RGBVM_OP_WRITE = 0x6,
+  RGBVM_OP_INIT = 0xc,
+  RGBVM_OP_SEND = 0xd,
 
   // color manipulation
   RGBVM_OP_HSV2RGB = 0x7,
@@ -78,12 +80,26 @@ struct rgbvm_arithmetic_instruction {
   uint8_t imm[];
 };
 
-struct rgbvm_output_instruction {
+struct rgbvm_write_instruction {
   enum rgbvm_opcode opcode : 4;
   enum rgbvm_reg srcr : 4;
   enum rgbvm_reg srcg : 4;
   enum rgbvm_reg srcb : 4;
-  uint8_t output;
+  uint8_t channel : 2;
+  uint8_t padding : 6;
+};
+
+struct rgbvm_init_instruction {
+  enum rgbvm_opcode opcode : 4;
+  enum driver_type driver : 4;
+  uint8_t channel : 2;
+  uint8_t padding : 6;
+};
+
+struct rgbvm_send_instruction {
+  enum rgbvm_opcode : 4;
+  uint8_t channel : 2;
+  uint8_t padding : 2;
 };
 
 struct rgbvm_hsv2rgb_instruction {
@@ -111,12 +127,14 @@ struct rgbvm_state {
 
   // flag register
   enum rgbvm_flag flag;
+
+  // output buffers
+  struct rgbvm_driver outputs[4];
 };
 
 void rgbvm_state_init(struct rgbvm_state *vm, const uint16_t code_len);
 
-enum rgbvm_status rgbvm_apply(rgbvm_delay delay, rgbvm_rgb_output output,
-                              struct rgbvm_state *vm,
+enum rgbvm_status rgbvm_apply(rgbvm_delay delay, struct rgbvm_state *vm,
                               const struct rgbvm_instruction *inst);
 
 #ifdef __cplusplus
