@@ -1,19 +1,20 @@
 
 # start with two hue phases 180 degrees out of sync
 # the hue will advance by 16 (22.5 degrees) each iteration
-# we'll fix the saturation and value at 255
+# we'll allow the value to be controlled by an input
+# the saturation is fixed at 255
 
 set r0 0
 set r2 255
 
-# initialize channel 0 with the analog driver
+# initialize output channel 0 with the analog driver
 init 1 0 0
 
 :loop
 
 set r3 r0
 set r4 r2
-set r5 r2
+input r5 0
 hsv2rgb r3 r4 r5
 write r3 r4 r5 0
 send 0

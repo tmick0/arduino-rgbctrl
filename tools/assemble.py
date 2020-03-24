@@ -133,6 +133,13 @@ class instruction_send (instruction_base):
         channel.width = 2
         super().__init__(channel, padding(2))
 
+@instruction("input")
+class instruction_input (instruction_base):
+    opcode = opcode(0xe)
+    def __init__(self, reg, pin):
+        pin.width = 4
+        super().__init__(reg, pin, padding(4))
+
 @instruction("hsv2rgb")
 class instruction_hsv2rgb (instruction_base):
     opcode = opcode(0x7)

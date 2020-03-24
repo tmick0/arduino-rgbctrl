@@ -1,4 +1,5 @@
 #include "rgbvm.h"
+#include "input.h"
 
 typedef void (*rgbvm_arith_op_impl)(struct rgbvm_state *, uint8_t *, uint8_t);
 
@@ -310,6 +311,19 @@ enum rgbvm_status rgbvm_apply(rgbvm_delay delay, struct rgbvm_state *vm,
     }
     fn(&vm->outputs[i->channel]);
     rgbvm_increment_ip(vm, 1);
+    return RGBVM_STATUS_OK;
+  }
+  case RGBVM_OP_INPUT: {
+    const struct rgbvm_input_instruction *i =
+        (const struct rgbvm_input_instruction *)inst;
+    uint8_t *dest = rgbvm_decode_reg(vm, i->dest);
+    if (dest == 0) {
+      return RGBVM_STATUS_ILL;
+    }
+    if (input_read(i->channel, dest)) {
+      return RGBVM_STATUS_ILL;
+    }
+    rgbvm_increment_ip(vm, 2);
     return RGBVM_STATUS_OK;
   }
   case RGBVM_OP_HSV2RGB: {

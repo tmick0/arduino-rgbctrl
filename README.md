@@ -68,7 +68,8 @@ The framework conveniently provides  `make upload` to flash the Arduino firmware
 ## Virtual machine
 
 rgb-ctrl is based on an 8-bit virtual machine called rgbvm. It implements an application-specific instruction set, having 15 general purpose registers,
-a flag register, an instruction pointer register, a few basic arithmetic operations, color space conversion operations, branching operations, and output controls.
+a flag register, an instruction pointer register, a few basic arithmetic operations, color space conversion operations, branching operations, and output controls,
+and an instruction that reads analog inputs.
 
 Execution starts at instruction offset 0, resetting to 0 if the end of the program is reached.
 
@@ -90,6 +91,7 @@ Execution starts at instruction offset 0, resetting to 0 if the end of the progr
 | init     | immd immc \[immf\] | initialize output channel immc with driver number immd and optional flags immf |
 | write    | rr rg rb immc      | buffer rgb value from registers on output channel immc                         |
 | send     | immc               | activate the buffered output of immc                                           |
+| input    | rdst immpin        | load rdst with the value from the analog pin numbered by the immediate         |
 
 Take a look at [hue_cycle.rgbvm](scripts/hue_cycle.rgbvm) or [hue_cycle.rgbvm](scripts/value_pulse.rgbvm) for usage examples.
 

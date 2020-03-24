@@ -4,10 +4,15 @@ generate_arduino_library(driver_lib
     HDRS driver.h analog.h
 )
 
+generate_arduino_library(input_lib
+    SRCS input.cpp
+    HDRS input.h
+)
+
 generate_arduino_library(rgbvm_lib
     SRCS rgbvm.c
     HDRS rgbvm.h
-    LIBS driver_lib
+    LIBS driver_lib input_lib
 )
 
 generate_arduino_library(proto_lib

@@ -26,6 +26,7 @@ enum rgbvm_opcode {
   RGBVM_OP_WRITE = 0x6,
   RGBVM_OP_INIT = 0xc,
   RGBVM_OP_SEND = 0xd,
+  RGBVM_OP_INPUT = 0xe,
 
   // color manipulation
   RGBVM_OP_HSV2RGB = 0x7,
@@ -100,6 +101,13 @@ struct rgbvm_send_instruction {
   enum rgbvm_opcode : 4;
   uint8_t channel : 2;
   uint8_t padding : 2;
+};
+
+struct rgbvm_input_instruction {
+  enum rgbvm_opcode : 4;
+  enum rgbvm_reg dest : 4;
+  uint8_t channel : 4;
+  uint8_t padding : 4;
 };
 
 struct rgbvm_hsv2rgb_instruction {
