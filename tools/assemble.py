@@ -51,7 +51,7 @@ class instruction_base (object):
     def __init__(self, *args):
         self.args = args
     
-    def bytes(self):
+    def bytes(self, verbose=False):
         parts = [self.opcode] + list(self.args)
 
         bytes_out = []
@@ -71,6 +71,8 @@ class instruction_base (object):
             raise RuntimeError("got an incomplete byte")
 
         res = b''.join(bytes_out)
+        if verbose:
+            print("assembling {:s} ({:02x}) {} -> {}".format(str(self.__class__.__name__), self.opcode, self.args, res.hex()))
         return res
 
 @instruction("nop")
@@ -166,6 +168,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("input")
     parser.add_argument("output")
+    parser.add_argument('--verbose', '-v', action='store_true', default=False)
 
     args = parser.parse_args()
 
@@ -201,7 +204,7 @@ def main():
                 instr = INSTRUCTIONS[parts[0]]
                 opers = [decode_operand(s) for s in parts[1:]]
                 v = instr(*opers)
-                fho.write(v.bytes())
+                fho.write(v.bytes(args.verbose))
             except:
                 print("failed on line {:d}: {}".format(i, line))
                 raise
