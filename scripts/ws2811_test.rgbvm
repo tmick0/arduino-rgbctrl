@@ -1,0 +1,46 @@
+
+# start with two hue at 0 degrees
+# we'll allow the value to be controlled by an input
+# the saturation is fixed at 255
+
+set r0 0
+set r2 255
+
+# number of WS2811s in series
+set r7 24
+
+# hue difference between adjacent LEDs
+set r10 4
+
+# initialize output channel 0 with the ws2811 driver on pin 8
+init 2 0 8
+
+# only increase the hue every 8th loop
+:increment
+add r0 1
+set r6 8
+
+:loop
+input r8 0
+set r9 0
+set r11 r7
+
+:nextled
+set r3 r0
+add r3 r9
+set r4 r2
+set r5 r8
+hsv2rgb r3 r4 r5
+write r3 r4 r5 0
+add r9 r10
+add r11 -1
+cmp r11 0
+brne :nextled
+
+send 0
+
+add r6 -1
+cmp r6 0
+breq :increment
+
+goto :loop
