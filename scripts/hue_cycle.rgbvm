@@ -10,16 +10,22 @@ set r2 255
 # initialize output channel 0 with the analog driver
 init 1 0 0
 
-:loop
+# only increase the hue every 256th loop
+# this lowers input latency without making the cycle too fast
+:increment
+add r0 1
+set r6 255
 
+:loop
 set r3 r0
 set r4 r2
 input r5 0
 hsv2rgb r3 r4 r5
 write r3 r4 r5 0
 send 0
-add r0 2
 
-nop 7
+add r6 -1
+cmp r6 0
+breq :increment
 
 goto :loop
