@@ -4,14 +4,16 @@
 #include "driver.h"
 #include "stdint.h"
 
+#define DRIVER_BUFFER_SIZE 128
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 enum driver_type {
   DRIVER_UNSET = 0x0,
-  DRIVER_ANALOG = 0x1
-  // DRIVER_WS2812B = 0x2
+  DRIVER_ANALOG = 0x1,
+  DRIVER_WS2811 = 0x2
   // DRIVER_APA102C = 0x3
 };
 
@@ -31,7 +33,7 @@ struct rgbvm_driver {
   driver_send send;
   uint8_t arg;
   uint8_t ptr;
-  struct rgb_value buffer[128];
+  struct rgb_value buffer[DRIVER_BUFFER_SIZE];
 };
 
 driver_init get_driver(const enum driver_type);

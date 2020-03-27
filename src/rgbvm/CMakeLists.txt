@@ -1,7 +1,7 @@
 
 generate_arduino_library(driver_lib
-    SRCS driver.c analog.cpp
-    HDRS driver.h analog.h
+    SRCS driver.c analog.cpp ws2811.cpp
+    HDRS driver.h analog.h   ws2811.h
 )
 
 generate_arduino_library(input_lib
