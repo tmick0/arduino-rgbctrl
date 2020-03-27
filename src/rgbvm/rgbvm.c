@@ -21,6 +21,10 @@ void rgbvm_cmp_impl(struct rgbvm_state *vm, uint8_t *dest, uint8_t src);
 int rgbvm_goto_impl(struct rgbvm_state *vm);
 int rgbvm_breq_impl(struct rgbvm_state *vm);
 int rgbvm_brne_impl(struct rgbvm_state *vm);
+int rgbvm_brlt_impl(struct rgbvm_state *vm);
+int rgbvm_brle_impl(struct rgbvm_state *vm);
+int rgbvm_brgt_impl(struct rgbvm_state *vm);
+int rgbvm_brge_impl(struct rgbvm_state *vm);
 
 int rgbvm_decode_arithmetic(struct rgbvm_state *vm,
                             const struct rgbvm_arithmetic_instruction *inst,
@@ -109,6 +113,12 @@ void rgbvm_cmp_impl(struct rgbvm_state *vm, uint8_t *dest, uint8_t src) {
   } else {
     vm->flag &= ~RGBVM_FLAG_EQUAL;
   }
+
+  if (*dest < src) {
+    vm->flag |= RGBVM_FLAG_LESS;
+  } else {
+    vm->flag &= ~RGBVM_FLAG_LESS;
+  }
 }
 
 int rgbvm_goto_impl(struct rgbvm_state *vm) { return 1; }
@@ -119,6 +129,22 @@ int rgbvm_breq_impl(struct rgbvm_state *vm) {
 
 int rgbvm_brne_impl(struct rgbvm_state *vm) {
   return (vm->flag & RGBVM_FLAG_EQUAL) == 0;
+}
+
+int rgbvm_brlt_impl(struct rgbvm_state *vm) {
+  return (vm->flag & RGBVM_FLAG_LESS) != 0;
+}
+
+int rgbvm_brle_impl(struct rgbvm_state *vm) {
+  return (vm->flag & (RGBVM_FLAG_LESS | RGBVM_FLAG_EQUAL)) != 0;
+}
+
+int rgbvm_brge_impl(struct rgbvm_state *vm) {
+  return (vm->flag & RGBVM_FLAG_LESS) == 0;
+}
+
+int rgbvm_brgt_impl(struct rgbvm_state *vm) {
+  return (vm->flag & (RGBVM_FLAG_LESS | RGBVM_FLAG_EQUAL)) == 0;
 }
 
 int rgbvm_decode_arithmetic(struct rgbvm_state *vm,
@@ -167,15 +193,27 @@ int rgbvm_decode_branch(struct rgbvm_state *vm,
                         const struct rgbvm_branch_instruction *inst,
                         rgbvm_branch_op_impl *cond, uint8_t *size) {
   *size = 3;
-  switch (inst->opcode) {
-  case RGBVM_OP_GOTO:
+  switch (inst->mode) {
+  case RGBVM_BRANCH_GOTO:
     *cond = &rgbvm_goto_impl;
     break;
-  case RGBVM_OP_BRNE:
+  case RGBVM_BRANCH_NE:
     *cond = &rgbvm_brne_impl;
     break;
-  case RGBVM_OP_BREQ:
+  case RGBVM_BRANCH_EQ:
     *cond = &rgbvm_breq_impl;
+    break;
+  case RGBVM_BRANCH_LT:
+    *cond = &rgbvm_brlt_impl;
+    break;
+  case RGBVM_BRANCH_GT:
+    *cond = &rgbvm_brgt_impl;
+    break;
+  case RGBVM_BRANCH_LE:
+    *cond = &rgbvm_brle_impl;
+    break;
+  case RGBVM_BRANCH_GE:
+    *cond = &rgbvm_brge_impl;
     break;
   default:
     return 1;
@@ -339,9 +377,7 @@ enum rgbvm_status rgbvm_apply(rgbvm_delay delay, struct rgbvm_state *vm,
     rgbvm_increment_ip(vm, 2);
     return RGBVM_STATUS_OK;
   }
-  case RGBVM_OP_GOTO:
-  case RGBVM_OP_BREQ:
-  case RGBVM_OP_BRNE: {
+  case RGBVM_OP_BRANCH: {
     struct rgbvm_branch_instruction *i =
         (struct rgbvm_branch_instruction *)inst;
     rgbvm_branch_op_impl condition;

@@ -149,20 +149,37 @@ class instruction_hsv2rgb (instruction_base):
         super().__init__(r, g, b)
 
 class branch_instruction_base (instruction_base):
+    opcode = opcode(0x8)
     def __init__(self, addr):
-        super().__init__(padding(4), addr)
+        super().__init__(self.mode, addr)
 
 @instruction("goto")
 class instruction_goto (branch_instruction_base):
-    opcode = opcode(0x8)
-
-@instruction("brne")
-class instruction_goto (branch_instruction_base):
-    opcode = opcode(0xa)
+    mode = register(0x0)
 
 @instruction("breq")
-class instruction_goto (branch_instruction_base):
-    opcode = opcode(0xb)
+class instruction_breq (branch_instruction_base):
+    mode = opcode(0x1)
+
+@instruction("brne")
+class instruction_brne (branch_instruction_base):
+    mode = register(0x2)
+
+@instruction("brlt")
+class instruction_brlt (branch_instruction_base):
+    mode = register(0x3)
+
+@instruction("brle")
+class instruction_brle (branch_instruction_base):
+    mode = register(0x4)
+
+@instruction("brgt")
+class instruction_brgt (branch_instruction_base):
+    mode = register(0x5)
+
+@instruction("brge")
+class instruction_brge (branch_instruction_base):
+    mode = register(0x6)
 
 def main():
     parser = argparse.ArgumentParser()

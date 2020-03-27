@@ -32,9 +32,7 @@ enum rgbvm_opcode {
   RGBVM_OP_HSV2RGB = 0x7,
 
   // branching
-  RGBVM_OP_GOTO = 0x8,
-  RGBVM_OP_BRNE = 0xa,
-  RGBVM_OP_BREQ = 0xb
+  RGBVM_OP_BRANCH = 0x8
 };
 
 enum rgbvm_reg {
@@ -57,11 +55,25 @@ enum rgbvm_reg {
       0xf // indicates source operand is an immediate in imm[0], not a register
 };
 
-enum rgbvm_flag { RGBVM_FLAG_EMPTY = 0x0, RGBVM_FLAG_EQUAL = 0x1 };
+enum rgbvm_flag {
+  RGBVM_FLAG_EMPTY = 0x0,
+  RGBVM_FLAG_EQUAL = 0x1,
+  RGBVM_FLAG_LESS = 0x2
+};
 
 enum rgbvm_status {
   RGBVM_STATUS_OK = 0,
   RGBVM_STATUS_ILL = 1 // illegal instruction
+};
+
+enum rgbvm_branch {
+  RGBVM_BRANCH_GOTO = 0x0,
+  RGBVM_BRANCH_EQ = 0x1,
+  RGBVM_BRANCH_NE = 0x2,
+  RGBVM_BRANCH_LT = 0x3,
+  RGBVM_BRANCH_LE = 0x4,
+  RGBVM_BRANCH_GT = 0x5,
+  RGBVM_BRANCH_GE = 0x6
 };
 
 struct rgbvm_instruction {
@@ -119,7 +131,7 @@ struct rgbvm_hsv2rgb_instruction {
 
 struct rgbvm_branch_instruction {
   enum rgbvm_opcode opcode : 4;
-  uint16_t padding : 4;
+  enum rgbvm_branch mode : 4;
   uint16_t dest;
 };
 
@@ -134,7 +146,7 @@ struct rgbvm_state {
   uint8_t reg[15];
 
   // flag register
-  enum rgbvm_flag flag;
+  int flag;
 
   // output buffers
   struct rgbvm_driver outputs[4];

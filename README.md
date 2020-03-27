@@ -87,6 +87,10 @@ Execution starts at instruction offset 0, resetting to 0 if the end of the progr
 | goto     | address            | move the instruction pointer to address                                        |
 | brne     | address            | move the ip to address if last comparison was not equal                        |
 | breq     | address            | move the ip to address if last comparison was equal                            |
+| brlt     | address            | move the ip to address if last comparison was less than                        |
+| brle     | address            | move the ip to address if last comparison was less or equal                    |
+| brgt     | address            | move the ip to address if last comparison was greater than                     |
+| brge     | address            | move the ip to address if last comparison was greater or equal                 |
 | hsv2rgb  | rh rs rv           | convert rgb values in registers to hsv (inplace)                               |
 | init     | immd immc \[immf\] | initialize output channel immc with driver number immd and optional flags immf |
 | write    | rr rg rb immc      | buffer rgb value from registers on output channel immc                         |
