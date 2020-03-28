@@ -39,6 +39,7 @@ int proto_state_machine_ingest(struct rgbvm_state *vm, uint8_t *code,
     code[psm->offset++] = byte;
     if (psm->offset == vm->ip_max) {
       cb(psm);
+      vm->ip = 0;
       psm->state = PROTO_STATE_INIT;
       *res = PROTO_MSG_OK;
       return 1;
