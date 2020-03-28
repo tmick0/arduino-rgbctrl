@@ -13,8 +13,8 @@ extern "C" {
 enum driver_type {
   DRIVER_UNSET = 0x0,
   DRIVER_ANALOG = 0x1,
-  DRIVER_WS2811 = 0x2
-  // DRIVER_APA102C = 0x3
+  DRIVER_WS2811 = 0x2,
+  DRIVER_APA102 = 0x3
 };
 
 struct rgbvm_driver;
