@@ -2,6 +2,8 @@
 
 A flexible, scriptable RGB controller that can be reprogrammed over a serial connection.
 
+![An Arduino on a breadboard driving an LED strip](images/demo.jpg)
+
 ## Overview
 
 The main goal of this project is to provide a more customizable LED controller than off-the-shelf ones, with modular support
@@ -25,6 +27,8 @@ Features:
 TODO:
 
 - Implement a GUI for easily programming and flashing the bytecode.
+
+More information on this project is [available on my blog](https://lo.calho.st/posts/rgb-arduino/).
 
 ## Usage
 
