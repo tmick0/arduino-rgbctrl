@@ -2,6 +2,7 @@
 #include <Arduino.h>
 #include <EEPROM.h>
 
+#include "ir.h"
 #include "proto.h"
 #include "rgbvm.h"
 
@@ -23,6 +24,7 @@ void setup() {
 
   proto_state_machine_init(&s.psm);
   rgbvm_state_init(&s.vm, code_len);
+  ir_setup(&s.vm);
 }
 
 void write_eeprom(const proto_state_machine *psm) {
@@ -43,6 +45,7 @@ void loop() {
   }
 
   if (s.psm.state == PROTO_STATE_INIT) {
+    ir_decode(&s.vm);
     if (rgbvm_apply(delay, &s.vm,
                     (const rgbvm_instruction *)&s.code[s.vm.ip]) !=
         RGBVM_STATUS_OK) {

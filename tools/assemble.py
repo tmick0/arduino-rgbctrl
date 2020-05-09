@@ -142,6 +142,13 @@ class instruction_input (instruction_base):
         pin.width = 4
         super().__init__(reg, pin, padding(4))
 
+@instruction("remote")
+class instruction_remote (instruction_base):
+    opcode = opcode(0xa)
+    def __init__(self, reg, pin):
+        pin.width = 4
+        super().__init__(reg, pin, padding(4))
+
 @instruction("hsv2rgb")
 class instruction_hsv2rgb (instruction_base):
     opcode = opcode(0x7)

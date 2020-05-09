@@ -1,0 +1,72 @@
+
+# set width of hue shift space
+set r12 80
+
+# number of apa102s in series
+set r7 10
+
+# hue difference between adjacent LEDs
+set r10 2
+
+# initialize output channel 0 with the apa102 driver on pins 8 (clock) and 9 (data)
+init 3 0 8
+
+# counter
+set r0 0
+
+# direction flag
+set r14 0
+
+:increment
+# check if we're going forward or backward
+cmp r14 0
+breq :increment_forward
+
+:increment_reverse
+# check if we have to switch back to forward
+cmp r0 0
+brne :do_increment_reverse
+set r14 0
+goto :increment_forward
+:do_increment_reverse
+add r0 -1
+goto :continue
+
+:increment_forward
+# check if we have to reverse
+cmp r0 r12
+brne :do_increment_forward
+set r14 1
+goto :increment_reverse
+:do_increment_forward
+add r0 1
+
+:continue
+
+# only increase the hue every 8th loop
+set r6 8
+
+:loop
+set r9 0
+set r11 r7
+
+:nextled
+remote r3 0
+add r3 r0
+add r3 r9
+remote r4 1
+remote r5 2
+hsv2rgb r3 r4 r5
+write r3 r4 r5 0
+add r9 r10
+add r11 -1
+cmp r11 0
+brne :nextled
+
+send 0
+
+add r6 -1
+cmp r6 0
+breq :increment
+
+goto :loop

@@ -26,9 +26,11 @@ void apa102_write(struct rgbvm_driver *driver, const uint8_t r, const uint8_t g,
 static void apa102_byte(const uint8_t clock, const uint8_t data,
                         const uint8_t byte) {
   for (int i = 0; i < 8; ++i) {
+    noInterrupts();
     digitalWrite(data, byte >> (7 - i) & 0x1);
     digitalWrite(clock, HIGH);
     digitalWrite(clock, LOW);
+    interrupts();
   }
 }
 
@@ -44,6 +46,7 @@ void apa102_send(struct rgbvm_driver *driver) {
   apa102_byte(clock, data, 0);
 
   for (int i = 0; i < driver->ptr; ++i) {
+
     // header (currently hardcoded max brightness)
     apa102_byte(clock, data, 0xff);
 

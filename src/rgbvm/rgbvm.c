@@ -364,6 +364,20 @@ enum rgbvm_status rgbvm_apply(rgbvm_delay delay, struct rgbvm_state *vm,
     rgbvm_increment_ip(vm, 2);
     return RGBVM_STATUS_OK;
   }
+  case RGBVM_OP_REMOTE: {
+    const struct rgbvm_remote_instruction *i =
+        (const struct rgbvm_remote_instruction *)inst;
+    uint8_t *dest = rgbvm_decode_reg(vm, i->dest);
+    if (dest == 0) {
+      return RGBVM_STATUS_ILL;
+    }
+    if (i->channel > 9) {
+      return RGBVM_STATUS_ILL;
+    }
+    *dest = vm->remote_values[i->channel];
+    rgbvm_increment_ip(vm, 2);
+    return RGBVM_STATUS_OK;
+  }
   case RGBVM_OP_HSV2RGB: {
     const struct rgbvm_hsv2rgb_instruction *i =
         (const struct rgbvm_hsv2rgb_instruction *)inst;

@@ -21,6 +21,6 @@ generate_arduino_library(proto_lib
     LIBS rgbvm_lib)
 
 generate_arduino_firmware(rgbvm_main
-    SRCS main.cpp
+    SRCS main.cpp ir.cpp
     LIBS rgbvm_lib proto_lib
-    ARDLIBS EEPROM)
+    ARDLIBS EEPROM IRremote)

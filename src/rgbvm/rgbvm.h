@@ -27,6 +27,7 @@ enum rgbvm_opcode {
   RGBVM_OP_INIT = 0xc,
   RGBVM_OP_SEND = 0xd,
   RGBVM_OP_INPUT = 0xe,
+  RGBVM_OP_REMOTE = 0xa,
 
   // color manipulation
   RGBVM_OP_HSV2RGB = 0x7,
@@ -122,6 +123,13 @@ struct rgbvm_input_instruction {
   uint8_t padding : 4;
 };
 
+struct rgbvm_remote_instruction {
+  enum rgbvm_opcode : 4;
+  enum rgbvm_reg dest : 4;
+  uint8_t channel : 4;
+  uint8_t padding : 4;
+};
+
 struct rgbvm_hsv2rgb_instruction {
   enum rgbvm_opcode opcode : 4;
   enum rgbvm_reg h_r : 4;
@@ -150,6 +158,9 @@ struct rgbvm_state {
 
   // output buffers
   struct rgbvm_driver outputs[4];
+
+  // remote control register values
+  uint8_t remote_values[9];
 };
 
 void rgbvm_state_init(struct rgbvm_state *vm, const uint16_t code_len);
